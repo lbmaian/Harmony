@@ -131,10 +131,10 @@ namespace HarmonyLib
 					FileLog.Log("AccessTools.DeclaredField: name is null");
 				return null;
 			}
-			var field = type.GetField(name, allDeclared);
-			if (field == null && Harmony.DEBUG)
+			var fieldInfo = type.GetField(name, allDeclared);
+			if (fieldInfo == null && Harmony.DEBUG)
 				FileLog.Log($"AccessTools.DeclaredField: Could not find field for type {type} and name {name}");
-			return field;
+			return fieldInfo;
 		}
 
 		/// <summary>Gets the reflection information for a field by searching the type and all its super types</summary>
@@ -156,10 +156,10 @@ namespace HarmonyLib
 					FileLog.Log("AccessTools.Field: name is null");
 				return null;
 			}
-			var field = FindIncludingBaseTypes(type, t => t.GetField(name, all));
-			if (field == null && Harmony.DEBUG)
+			var fieldInfo = FindIncludingBaseTypes(type, t => t.GetField(name, all));
+			if (fieldInfo == null && Harmony.DEBUG)
 				FileLog.Log($"AccessTools.Field: Could not find field for type {type} and name {name}");
-			return field;
+			return fieldInfo;
 		}
 
 		/// <summary>Gets the reflection information for a field</summary>
@@ -175,10 +175,10 @@ namespace HarmonyLib
 					FileLog.Log("AccessTools.DeclaredField: type is null");
 				return null;
 			}
-			var field = GetDeclaredFields(type).ElementAtOrDefault(idx);
-			if (field == null && Harmony.DEBUG)
+			var fieldInfo = GetDeclaredFields(type).ElementAtOrDefault(idx);
+			if (fieldInfo == null && Harmony.DEBUG)
 				FileLog.Log($"AccessTools.DeclaredField: Could not find field for type {type} and idx {idx}");
-			return field;
+			return fieldInfo;
 		}
 
 		/// <summary>Gets the reflection information for a directly declared property</summary>
@@ -343,10 +343,9 @@ namespace HarmonyLib
 				catch (AmbiguousMatchException ex)
 				{
 					result = FindIncludingBaseTypes(type, t => t.GetMethod(name, all, null, new Type[0], modifiers));
-
 					if (result == null)
 					{
-						throw new AmbiguousMatchException($"Ambiguous match in Harmony patch for {type}:{name}." + ex);
+						throw new AmbiguousMatchException($"Ambiguous match in Harmony patch for {type}:{name}", ex);
 					}
 				}
 			}
