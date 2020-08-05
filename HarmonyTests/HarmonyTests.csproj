@@ -50,6 +50,16 @@
 
 	<ItemGroup Condition="'$(TargetFrameworkIdentifier)'=='.NETCoreApp'">
 		<PackageReference Include="Lokad.ILPack" Version="0.1.4" PrivateAssets="All" />
+		<!--PackageReference Include="Tmds.ExecFunction" Version="0.4.0" /-->
+		<Reference Include="Tmds.ExecFunction">
+			<HintPath>libs\Tmds.ExecFunction.dll</HintPath>
+		</Reference>
+		<!--
+		<Content Include="libs\Tmds.ExecFunction.x86.*">
+			<Link>%(Filename)%(Extension)</Link>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		-->
 	</ItemGroup>
 
 	<Target Name="ChangeAliasesOfStrongNameAssemblies" BeforeTargets="FindReferenceAssembliesForReferences;ResolveReferences">

@@ -65,15 +65,47 @@ namespace HarmonyLibTests
 			TestTools.Log($"Running patched ConcreteClass_Patch done");
 		}
 
-		// TODO: this test might crash in certain environments
-		[Test, NonParallelizable]
+#if NETCOREAPP
+		static readonly Tmds.Utils.FunctionExecutor functionExecutor = new Tmds.Utils.FunctionExecutor(config =>
+		{
+			config.StartInfo.RedirectStandardOutput = true;
+			config.StartInfo.RedirectStandardError = true;
+			config.OnExit = process =>
+			{
+				TestContext.Write(process.StandardOutput.ReadToEnd());
+
+				if (process.ExitCode != 0)
+					Assert.Fail($"Function exited with code {process.ExitCode}:\n{process.StandardError.ReadToEnd()}");
+				else
+					TestContext.Error.Write(process.StandardError.ReadToEnd());
+			};
+		});
+#endif
+
+		// This test might crash in certain environments.
+		[Test]
+//#if NETCOREAPP
+//		[Parallelizable(ParallelScope.All)]
+//#else
+		[NonParallelizable]
+//#endif
+		public void Test_Patch_Returning_Structs([Values(1/*, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20*/)] int n, [Values("I", "S")] string type)
+		{
+#if NETCOREAPP
+			functionExecutor.Run(args => Test_Patch_Returning_Structs_Internal(int.Parse(args[0]), args[1]), new string[] { n.ToString(), type });
+#else
+			Test_Patch_Returning_Structs_Internal(n, type);
+#endif
+		}
+
 #if NETFRAMEWORK && !NET35
 		// Following attributes allows exception handling to try catching any CSEs that can cause crashes in .NET Framework 4.0+.
 		// Note: This doesn't do anything in .NET Core, and .NET Framework 3.5 already tries catching such CSEs by default.
 		[System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions, System.Security.SecurityCritical]
 #endif
-		public void Test_Patch_Returning_Structs([Values(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20)] int n, [Values("I", "S")] string type)
+		static void Test_Patch_Returning_Structs_Internal(int n, string type)
 		{
+			Console.Error.WriteLine("Environment.Is64BitProcess: " + AccessTools.Property(typeof(Environment), "Is64BitProcess").GetValue(null, null));
 			var name = $"{type}M{n:D2}";
 
 			var patchClass = typeof(ReturningStructs_Patch);
